@@ -20,6 +20,7 @@ import { nftRoutes } from './routes/nft';
 import { streamingRoutes } from './routes/streaming';
 import { liveEventsRoutes } from './routes/live-events';
 import { governanceRoutes } from './routes/governance';
+import { audioRoutes } from './routes/audio';
 import { initializeSocketHandlers } from './services/socketService';
 import { ipfsService } from './services/ipfsService';
 
@@ -146,6 +147,7 @@ app.post('/api/v1/upload', upload.single('audio'), async (req, res) => {
 
 // API routes
 app.use('/api/v1/music', musicRoutes);
+app.use('/api/v1/audio', audioRoutes);
 app.use('/api/v1/artists', artistRoutes);
 app.use('/api/v1/fans', fanRoutes);
 app.use('/api/v1/nft', nftRoutes);
