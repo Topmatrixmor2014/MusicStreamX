@@ -146,6 +146,7 @@ app.post('/api/v1/upload', upload.single('audio'), async (req, res) => {
 });
 
 // API routes
+app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/music', musicRoutes);
 app.use('/api/v1/audio', audioRoutes);
 app.use('/api/v1/artists', artistRoutes);
