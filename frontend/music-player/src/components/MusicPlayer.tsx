@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useMusicPlayerStore } from '../store/musicPlayerStore';
 import { useWalletStore } from '../store/walletStore';
+import { useStreamCount } from '../utils/useStreamCount';
 
 export const MusicPlayer: React.FC = () => {
   const {
@@ -34,6 +35,7 @@ export const MusicPlayer: React.FC = () => {
   } = useMusicPlayerStore();
 
   const { isConnected } = useWalletStore();
+  const { streamCount } = useStreamCount(currentTrack?.id);
   const [showVolume, setShowVolume] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -166,6 +168,11 @@ export const MusicPlayer: React.FC = () => {
                 <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                   {currentTrack.artist}
                 </p>
+                {streamCount !== null && (
+                  <p className="text-xs text-purple-500 dark:text-purple-400">
+                    {streamCount.toLocaleString()} streams
+                  </p>
+                )}
               </div>
               
               <div className="flex items-center space-x-2">
