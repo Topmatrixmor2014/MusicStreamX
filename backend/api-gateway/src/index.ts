@@ -8,6 +8,7 @@ import dotenv from 'dotenv';
 import { createServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import multer from 'multer';
+import fs from 'fs';
 
 import { errorHandler } from './middleware/errorHandler';
 import { logger } from './utils/logger';
@@ -129,7 +130,6 @@ app.post('/api/v1/upload', upload.single('audio'), async (req, res) => {
     const ipfsHash = await ipfsService.uploadFile(req.file.path);
     
     // Clean up temporary file
-    const fs = require('fs');
     fs.unlinkSync(req.file.path);
 
     res.json({

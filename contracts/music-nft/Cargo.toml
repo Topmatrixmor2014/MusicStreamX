@@ -1,9 +1,8 @@
 [package]
-name = "musicstreamx-shared"
+name = "musicstreamx-music-nft"
 version = "1.0.0"
 edition = "2021"
-description = "Shared types and utilities for MusicStreamX smart contracts"
-authors = ["MusicStreamX Team <team@musicstreamx.io>"]
+description = "Music NFT contract for MusicStreamX"
 license = "MIT"
 
 [lib]
@@ -11,6 +10,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 soroban-sdk = { workspace = true }
+musicstreamx-shared = { workspace = true }
 
 [dev-dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }
