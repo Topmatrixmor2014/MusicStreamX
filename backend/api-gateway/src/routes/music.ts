@@ -1,6 +1,4 @@
-import { Router, Request, Response, NextFunction } from 'express';
-import multer from 'multer';
-import fs from 'fs';
+import { Router, Request, Response } from 'express';
 import { validateTrackMetadata } from '../middleware/validateTrackMetadata';
 import { cacheGet, cacheSet, cacheDel, TTL } from '../services/cacheService';
 
