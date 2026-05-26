@@ -1,6 +1,6 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, Address, Bytes, Env, String, Symbol};
-use musicstreamx_shared::{calculate_royalty, ContractError, MusicTrack, StreamingSession};
+use soroban_sdk::{contract, contractimpl, token, Address, Bytes, Env, String, Symbol};
+use musicstreamx_shared::{utils::calculate_royalty, ContractError, MusicTrack, StreamingSession};
 
 #[contract]
 pub struct StreamingContract;
@@ -21,7 +21,7 @@ impl StreamingContract {
         artist.require_auth();
 
         if duration == 0 || duration > 3600 {
-            return Err(ContractError::InvalidDuration);
+            return Err(ContractError::InvalidConfiguration);
         }
         if royalty_rate == 0 || royalty_rate > 5000 {
             return Err(ContractError::InvalidConfiguration);
@@ -47,12 +47,25 @@ impl StreamingContract {
         Ok(track_id)
     }
 
-    /// Record a stream and calculate royalty
+    /// Record a stream and pay XLM royalty to the artist.
+    ///
+    /// The listener must have pre-authorised a transfer of at least `royalty`
+    /// stroops to this contract (or the contract must hold sufficient balance
+    /// on behalf of the listener).  The contract then forwards the artist's
+    /// share directly to the artist address via the Stellar XLM token client.
+    ///
+    /// Parameters:
+    /// - `xlm_token`  – address of the native XLM token contract
+    /// - `listener`   – fan paying for the stream
+    /// - `track_id`   – ID of the track being played
+    /// - `quality`    – quality code: 0=standard, 1=high, 2=lossless, 3=master
+    /// - `duration`   – stream duration in seconds
     pub fn record_stream(
         env: Env,
+        xlm_token: Address,
         listener: Address,
         track_id: Bytes,
-        quality: String,
+        quality: u32,
         duration: u64,
     ) -> Result<u64, ContractError> {
         listener.require_auth();
@@ -71,7 +84,12 @@ impl StreamingContract {
         track.total_streams += 1;
         env.storage().persistent().set(&(key, track_id.clone()), &track);
 
-        let royalty = calculate_royalty(1, track.royalty_rate, 500); // 5% platform fee
+        // Calculate royalty (in stroops).  Platform fee is 5 % (500 bps).
+        let royalty = calculate_royalty(1, track.royalty_rate, 500);
+
+        // Transfer XLM from listener → artist via the native token contract.
+        let xlm = token::TokenClient::new(&env, &xlm_token);
+        xlm.transfer(&listener, &track.artist, &(royalty as i128));
 
         let session_id = env.crypto().sha256(&listener.clone().into()).into();
         let session = StreamingSession {
