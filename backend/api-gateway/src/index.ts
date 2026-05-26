@@ -14,6 +14,7 @@ import { errorHandler } from './middleware/errorHandler';
 import { logger } from './utils/logger';
 import { connectRedis } from './config/redis';
 import { connectDatabase } from './config/database';
+import { authRoutes } from './routes/auth';
 import { musicRoutes } from './routes/music';
 import { artistRoutes } from './routes/artists';
 import { fanRoutes } from './routes/fans';

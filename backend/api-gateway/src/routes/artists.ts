@@ -21,7 +21,15 @@ artistRoutes.get(
 artistRoutes.get(
   '/:id/analytics',
   validate([param('id').isUUID().withMessage('id must be a valid UUID')]),
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
+    const key = `artist_analytics:${req.params.id}`;
+    const cached = await cacheGet<object>(key);
+    if (cached) {
+      res.setHeader('X-Cache', 'HIT');
+      res.json(cached);
+      return;
+    }
+
     // Generate 30-day demo data; replace with real DB queries in production
     const today = new Date();
     const streamHistory = Array.from({ length: 30 }, (_, i) => {
@@ -39,7 +47,7 @@ artistRoutes.get(
     const totalStreams = streamHistory.reduce((s, p) => s + p.streams, 0);
     const totalEarnings = parseFloat(earningsHistory.reduce((s, p) => s + p.earnings, 0).toFixed(4));
 
-    res.json({
+    const result = {
       artistId: req.params.id,
       totalStreams,
       totalEarnings,
@@ -60,7 +68,11 @@ artistRoutes.get(
         { country: 'Japan', listeners: 840, percentage: 7.0 },
         { country: 'Other', listeners: 3000, percentage: 25.0 },
       ],
-    });
+    };
+
+    await cacheSet(key, result, TTL.ARTIST_PROFILE);
+    res.setHeader('X-Cache', 'MISS');
+    res.json(result);
   }
 );
 
